@@ -4,7 +4,7 @@ set -euo pipefail
 cd /home/ubuntu/legoplay
 
 echo "[deploy] pulling latest code (compose/env only)"
-git pull --ff-only || echo "[deploy] git pull skipped"
+git fetch origin main --quiet && git reset --hard origin/main
 
 echo "[deploy] pulling images"
 docker compose pull app websocket
