@@ -4,7 +4,7 @@ import { rolloverSeasons } from '$lib/server/seasons';
 import { svelteKitHandler } from 'better-auth/svelte-kit';
 import { redis } from '$lib/server/redis';
 import { building } from '$app/environment';
-import { redirect, type Handle, type RequestEvent } from '@sveltejs/kit';
+import { redirect, type Handle, type HandleServerError, type RequestEvent } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
 import { user, gemTransactions } from '$lib/server/db/schema';
 import { eq, sql } from 'drizzle-orm';
@@ -277,3 +277,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 export function clearUserCache(userId: string) {
 	sessionCache.delete(`user:${userId}`);
 }
+
+export const handleError: HandleServerError = ({ error, event, status, message }) => {
+	// Log the real cause of SSR/API failures (the client only sees "Internal Error").
+	console.error(
+		`[handleError] ${status} ${event.request.method} ${event.url.pathname}`,
+		error instanceof Error ? (error.stack ?? error.message) : error
+	);
+	return { message };
+};
