@@ -281,8 +281,24 @@ export function clearUserCache(userId: string) {
 export const handleError: HandleServerError = ({ error, event, status, message }) => {
 	// Log the real cause of SSR/API failures (the client only sees "Internal Error").
 	console.error(
-		`[handleError] ${status} ${event.request.method} ${event.url.pathname}`,
-		error instanceof Error ? (error.stack ?? error.message) : error
+		'[handleError]',
+		JSON.stringify({
+			status,
+			message,
+			route: event.route.id,
+			url: event.url.pathname,
+			errorType: typeof error,
+			errorCtor: (error as any)?.constructor?.name ?? null,
+			errorString: String(error),
+			errorJson: (() => {
+				try {
+					return JSON.stringify(error);
+				} catch {
+					return '<unserializable>';
+				}
+			})(),
+			stack: error instanceof Error ? error.stack : null
+		})
 	);
 	return { message };
 };
