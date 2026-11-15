@@ -1,6 +1,6 @@
-.github
+.github/*
 !.github/workflows/
-!.github/workflows/build.yml
+!.github/workflows/*.yml
 review.js
 .DS_Store
 
