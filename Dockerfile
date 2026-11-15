@@ -1,0 +1,70 @@
+# syntax = docker/dockerfile:1
+ARG NODE_VERSION=24
+FROM node:${NODE_VERSION}-slim AS base-node
+WORKDIR /app
+ENV NODE_ENV="production"
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y \
+    build-essential \
+    node-gyp \
+    pkg-config \
+    python-is-python3 \
+    curl \
+    ca-certificates \
+    unzip \
+    libc6 \
+    && rm -rf /var/lib/apt/lists/*
+
+FROM base-node AS build-main
+# Copy package files
+COPY website/package.json website/package-lock.json* ./
+
+# Install dependencies with platform-specific binaries
+RUN npm install --include=dev --platform=linux 
+#--arch=x64 (maybe not)
+
+# Copy the rest of the application
+COPY website/. .
+
+# Create .svelte-kit directory if it doesn't exist
+RUN mkdir -p .svelte-kit
+
+# Generate SvelteKit types and build
+
+ENV NODE_OPTIONS="--max-old-space-size=1408"
+
+# Build-time placeholders. SvelteKit's post-build analysis imports every
+# server module, and a few validate their environment on import. These values
+# only exist inside this build stage — the runtime reads website/.env instead
+# (all of these are $env/dynamic, so nothing is baked into the bundle).
+ENV DATABASE_URL="postgres://build:build@127.0.0.1:5432/build" \
+    PUBLIC_BETTER_AUTH_URL="https://legoplay.lordpipon.com" \
+    PRIVATE_BETTER_AUTH_SECRET="build-time-placeholder-secret-0123456789abcdef"
+RUN npm run build
+
+FROM base-node AS build-websocket
+WORKDIR /websocket
+RUN curl -fsSL https://bun.sh/install | bash
+ENV PATH="/root/.bun/bin:${PATH}"
+COPY website/websocket/package.json website/websocket/bun.lock* ./
+COPY website/websocket/tsconfig.json ./
+RUN bun install
+COPY website/websocket/src ./src/
+RUN bun build src/main.ts --outdir dist --target bun
+
+FROM base-node AS production-main
+COPY --from=build-main --chown=node:node /app/build ./build
+COPY --from=build-main --chown=node:node /app/node_modules ./node_modules
+COPY --from=build-main --chown=node:node /app/package.json ./package.json
+RUN mkdir -p /app/uploads/avatars /app/uploads/coins && chown -R node:node /app/uploads
+USER node
+EXPOSE 3000
+CMD ["node", "build"]
+
+FROM oven/bun:1 AS production-websocket
+WORKDIR /websocket
+COPY --from=build-websocket --chown=bun:bun /websocket/dist ./dist
+COPY --from=build-websocket --chown=bun:bun /websocket/package.json ./package.json
+USER bun
+EXPOSE 8080
+CMD ["bun", "run", "dist/main.js"]

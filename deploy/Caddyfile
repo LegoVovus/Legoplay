@@ -1,0 +1,26 @@
+# Local reverse proxy for the Cloudflare Tunnel.
+#
+# The tunnel routes https://legoplay.lordpipon.com -> http://localhost:5905.
+# Caddy receives that traffic and splits it:
+#   /ws*  -> the Bun WebSocket server (127.0.0.1:8082)
+#   rest  -> the SvelteKit app         (127.0.0.1:5906)
+#
+# This keeps the WebSocket on the main hostname (wss://legoplay.lordpipon.com/ws),
+# because Cloudflare's free Universal SSL certificate does not cover
+# second-level subdomains such as ws.legoplay.lordpipon.com.
+{
+	auto_https off
+}
+
+:5905 {
+	bind 127.0.0.1
+	encode zstd gzip
+
+	handle /ws* {
+		reverse_proxy 127.0.0.1:8082
+	}
+
+	handle {
+		reverse_proxy 127.0.0.1:5906
+	}
+}
