@@ -9,6 +9,7 @@
 	import { LockIcon, Tick01Icon } from '@hugeicons/core-free-icons';
 
 	const DISMISS_KEY = 'password-setup-dismissed-at';
+	const NEVER_KEY = 'password-setup-never-show';
 
 	let open = $state(false);
 	let password = $state('');
@@ -16,6 +17,7 @@
 	let saving = $state(false);
 	let checked = $state(false);
 	let attempted = $state(false);
+	let handled = false;
 
 	$effect(() => {
 		if ($USER_DATA && !checked) {
@@ -37,6 +39,7 @@
 			if (!res.ok) return;
 			const sec = await res.json();
 			if (sec.googleLinked && !sec.hasPassword) {
+				if (localStorage.getItem(NEVER_KEY) === '1') return;
 				const dismissedAt = Number(localStorage.getItem(DISMISS_KEY) ?? 0);
 				if (Date.now() - dismissedAt > 14 * 24 * 60 * 60 * 1000) {
 					open = true;
@@ -70,6 +73,8 @@
 				return;
 			}
 			localStorage.removeItem(DISMISS_KEY);
+			localStorage.removeItem(NEVER_KEY);
+			handled = true;
 			open = false;
 			password = '';
 			confirmPassword = '';
@@ -82,12 +87,28 @@
 	}
 
 	function dismiss() {
+		handled = true;
 		localStorage.setItem(DISMISS_KEY, String(Date.now()));
 		open = false;
 	}
+
+	function dismissForever() {
+		handled = true;
+		localStorage.setItem(NEVER_KEY, '1');
+		open = false;
+	}
+
+	function handleOpenChange(v: boolean) {
+		open = v;
+		// Closing via X / outside click / Esc also snoozes the prompt,
+		// so it does not pop up again on every page reload.
+		if (!v && !handled) {
+			dismiss();
+		}
+	}
 </script>
 
-<Dialog.Root {open} onOpenChange={(v) => open = v}>
+<Dialog.Root {open} onOpenChange={handleOpenChange}>
 	<Dialog.Content class="sm:max-w-sm">
 		<Dialog.Header>
 			<Dialog.Title class="flex items-center gap-2">
@@ -119,6 +140,15 @@
 					{saving ? 'Saving...' : 'Set Password'}
 				</Button>
 				<Button variant="ghost" onclick={dismiss}>Not now</Button>
+			</div>
+			<div class="pt-1 text-center">
+				<button
+					type="button"
+					class="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+					onclick={dismissForever}
+				>
+					Don't show again
+				</button>
 			</div>
 		</div>
 	</Dialog.Content>

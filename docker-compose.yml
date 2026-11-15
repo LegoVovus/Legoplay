@@ -1,5 +1,6 @@
 services:
   app:
+    image: ghcr.io/legovovus/legoplay-app:latest
     build:
       context: .
       target: production-main
@@ -37,6 +38,7 @@ services:
         max-file: "3"
 
   websocket:
+    image: ghcr.io/legovovus/legoplay-websocket:latest
     build:
       context: .
       target: production-websocket
