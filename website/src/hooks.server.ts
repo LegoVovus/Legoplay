@@ -279,26 +279,20 @@ export function clearUserCache(userId: string) {
 }
 
 export const handleError: HandleServerError = ({ error, event, status, message }) => {
-	// Log the real cause of SSR/API failures (the client only sees "Internal Error").
-	console.error(
-		'[handleError]',
-		JSON.stringify({
-			status,
-			message,
-			route: event.route.id,
-			url: event.url.pathname,
-			errorType: typeof error,
-			errorCtor: (error as any)?.constructor?.name ?? null,
-			errorString: String(error),
-			errorJson: (() => {
-				try {
-					return JSON.stringify(error);
-				} catch {
-					return '<unserializable>';
-				}
-			})(),
-			stack: error instanceof Error ? error.stack : null
-		})
-	);
+	// Log the real cause of server failures (clients only get "Internal Error").
+	if (status >= 500) {
+		console.error(
+			'[handleError]',
+			JSON.stringify({
+				status,
+				route: event.route.id,
+				url: event.url.pathname,
+				name: (error as any)?.name ?? null,
+				message: error instanceof Error ? error.message : String(error),
+				findings: (error as any)?.findings ?? null,
+				stack: error instanceof Error ? error.stack : null
+			})
+		);
+	}
 	return { message };
 };
