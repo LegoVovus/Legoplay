@@ -460,9 +460,10 @@ export const apikey = pgTable(
 		start: text('start'),
 		prefix: text('prefix'),
 		key: text('key').notNull(),
-		userId: integer('user_id')
-			.notNull()
-			.references(() => user.id, { onDelete: 'cascade' }),
+		// Legacy column. better-auth's api-key plugin stores the owner in
+		// referenceId and never writes userId, so it must stay nullable
+		// (otherwise better-auth refuses to start with a schema mismatch).
+		userId: integer('user_id').references(() => user.id, { onDelete: 'cascade' }),
 		referenceId: text('reference_id'),
 		configId: text('config_id'),
 		refillInterval: integer('refill_interval'),
