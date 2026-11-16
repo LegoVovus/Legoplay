@@ -612,9 +612,9 @@
 	{#if profileData?.profile?.profileBackground}
 		<div
 			aria-hidden="true"
-			class="pointer-events-none absolute inset-x-0 top-0 h-[70vh] min-h-[560px]"
+			class="pointer-events-none absolute inset-0"
 			style={`background: linear-gradient(180deg, ${profileData.profile
-				.profileBackground}4d 0%, ${profileData.profile.profileBackground}14 45%, transparent 100%)`}
+				.profileBackground}59 0%, ${profileData.profile.profileBackground}1f 25%, transparent 65%)`}
 		></div>
 	{/if}
 	<div class="container relative mx-auto max-w-6xl p-6">
