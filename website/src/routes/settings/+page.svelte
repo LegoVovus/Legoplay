@@ -783,7 +783,7 @@
 						<div class="space-y-3">
 							<Label>Profile Background</Label>
 							<p class="text-muted-foreground text-xs">
-								Pick a color for the banner at the top of your profile.
+								Pick a color for the background of your profile.
 							</p>
 							<div class="flex flex-wrap items-center gap-2">
 								<button
@@ -823,8 +823,8 @@
 							</div>
 							{#if profileBackground}
 								<div
-									class="border-border h-16 w-full rounded-md border"
-									style={`background: linear-gradient(120deg, ${profileBackground}, transparent 85%)`}
+									class="border-border h-24 w-full rounded-md border"
+									style={`background: linear-gradient(180deg, ${profileBackground}, transparent 85%)`}
 								></div>
 							{/if}
 						</div>

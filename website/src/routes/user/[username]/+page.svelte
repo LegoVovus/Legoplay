@@ -608,7 +608,16 @@
 	twitterCard="summary"
 />
 
-<div class="container mx-auto max-w-6xl p-6">
+<div class="relative">
+	{#if profileData?.profile?.profileBackground}
+		<div
+			aria-hidden="true"
+			class="pointer-events-none absolute inset-x-0 top-0 h-[70vh] min-h-[560px]"
+			style={`background: linear-gradient(180deg, ${profileData.profile
+				.profileBackground}4d 0%, ${profileData.profile.profileBackground}14 45%, transparent 100%)`}
+		></div>
+	{/if}
+	<div class="container relative mx-auto max-w-6xl p-6">
 	{#if loading}
 		<ProfileSkeleton />
 	{:else if !profileData}
@@ -619,14 +628,7 @@
 			</div>
 		</div>
 	{:else}
-		<Card.Root class="mb-6 overflow-hidden py-0">
-			{#if profileData.profile.profileBackground}
-				<div
-					class="h-20 w-full sm:h-24"
-					style={`background: linear-gradient(120deg, ${profileData.profile
-						.profileBackground}, transparent 85%)`}
-				></div>
-			{/if}
+		<Card.Root class="mb-6 py-0">
 			<Card.Content class="p-6">
 				<div class="flex flex-col gap-4 sm:flex-row sm:items-start">
 					<div class="flex-shrink-0">
@@ -1118,6 +1120,7 @@
 			</Card.Content>
 		</Card.Root>
 	{/if}
+	</div>
 </div>
 
 <Dialog.Root open={followDialogRelation !== null} onOpenChange={(o) => { if (!o) followDialogRelation = null; }}>
