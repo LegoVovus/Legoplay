@@ -43,6 +43,19 @@
 	let username = $state($USER_DATA?.username || '');
 	let timezone = $state($USER_DATA?.timezone == null ? '' : $USER_DATA.timezone.toString());
 	let profileBackground = $state($USER_DATA?.profileBackground ?? '');
+	let themeColor = $state($USER_DATA?.themeColor ?? '');
+
+	// Readable text colour for a filled button of the given colour.
+	function themeForeground(hex: string): string {
+		const n = parseInt(hex.slice(1), 16);
+		const lin = (c: number) => {
+			const s = c / 255;
+			return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+		};
+		const lum =
+			0.2126 * lin((n >> 16) & 255) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255);
+		return lum > 0.5 ? '#0a0a0a' : '#ffffff';
+	}
 
 	function profilePreviewColor(hex: string, weight = 0.38): string {
 		const n = parseInt(hex.replace('#', ''), 16);
@@ -72,6 +85,7 @@
 			username !== ($USER_DATA?.username || '') ||
 			avatarFile !== undefined ||
 			profileBackground !== ($USER_DATA?.profileBackground ?? '') ||
+			themeColor !== ($USER_DATA?.themeColor ?? '') ||
 			+timezone !== (($USER_DATA?.timezone == null ? '' : $USER_DATA.timezone.toString()))
 	);
 
@@ -226,6 +240,7 @@
 			fd.append('username', username);
 			fd.append('timezone', timezone);
 			fd.append('profileBackground', profileBackground);
+			fd.append('themeColor', themeColor);
 			if (avatarFile?.[0]) fd.append('avatar', avatarFile[0]);
 
 			const res = await fetch('/api/settings', { method: 'POST', body: fd });
@@ -243,7 +258,8 @@
 									name: result.name ?? u.name,
 									bio: result.bio ?? u.bio,
 									username: result.username ?? u.username,
-									profileBackground: result.profileBackground ?? null
+									profileBackground: result.profileBackground ?? null,
+									themeColor: result.themeColor ?? null
 								}
 							: u
 					);
@@ -838,6 +854,60 @@
 										class="h-full w-full rounded-md border border-white/15"
 										style="background: linear-gradient(180deg, rgb(0 0 0 / 0.02) 0%, rgb(0 0 0 / 0.55) 100%)"
 									></div>
+								</div>
+							{/if}
+						</div>
+
+						<div class="space-y-3">
+							<Label>Theme Color</Label>
+							<p class="text-muted-foreground text-xs">
+								Used for buttons, links and highlights across the site.
+							</p>
+							<div class="flex flex-wrap items-center gap-2">
+								<button
+									type="button"
+									onclick={() => (themeColor = '')}
+									class="border-border text-muted-foreground hover:text-foreground h-8 rounded-full border px-3 text-xs transition-colors {themeColor === ''
+										? 'ring-foreground bg-muted ring-2'
+										: ''}"
+								>
+									Default
+								</button>
+								{#each PROFILE_BACKGROUNDS as color}
+									<button
+										type="button"
+										aria-label={`Theme ${color}`}
+										aria-pressed={themeColor.toLowerCase() === color}
+										onclick={() => (themeColor = color)}
+										class="ring-offset-background hover:scale-110 h-8 w-8 rounded-full transition-transform {themeColor.toLowerCase() ===
+										color
+											? 'ring-foreground ring-2 ring-offset-2'
+											: 'ring-1 ring-border'}"
+										style={`background:${color}`}
+									></button>
+								{/each}
+								<label
+									class="border-border hover:border-foreground flex h-8 cursor-pointer items-center gap-1 rounded-full border px-2 text-xs transition-colors"
+									title="Custom color"
+								>
+									<input
+										type="color"
+										bind:value={themeColor}
+										aria-label="Custom theme color"
+										class="h-6 w-6 cursor-pointer rounded-full border-0 bg-transparent p-0"
+									/>
+									Custom
+								</label>
+							</div>
+							{#if themeColor}
+								<div class="flex items-center gap-3">
+									<span
+										class="inline-flex h-9 items-center rounded-md px-4 text-sm font-medium shadow-xs"
+										style={`background:${themeColor};color:${themeForeground(themeColor)}`}
+									>
+										Button preview
+									</span>
+									<span class="text-muted-foreground text-xs">Links and highlights use the same color.</span>
 								</div>
 							{/if}
 						</div>

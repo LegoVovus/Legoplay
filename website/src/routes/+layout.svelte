@@ -29,6 +29,45 @@ import { startVipUserPolling } from '$lib/stores/vip-users';
 		USER_DATA.set(data?.userSession ?? null);
 	});
 
+	// Personal accent colour: only the variables the theme already uses for
+	// filled buttons, links, focus rings and the active sidebar item.
+	const THEME_VARS = [
+		'--primary',
+		'--primary-foreground',
+		'--ring',
+		'--sidebar-primary',
+		'--sidebar-primary-foreground',
+		'--sidebar-ring'
+	];
+
+	function themeForeground(hex: string): string {
+		const n = parseInt(hex.slice(1), 16);
+		const lin = (c: number) => {
+			const s = c / 255;
+			return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+		};
+		const lum =
+			0.2126 * lin((n >> 16) & 255) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255);
+		return lum > 0.5 ? '#0a0a0a' : '#ffffff';
+	}
+
+	$effect(() => {
+		if (typeof document === 'undefined') return;
+		const color = $USER_DATA?.themeColor;
+		const root = document.documentElement;
+		if (color && /^#[0-9a-fA-F]{6}$/.test(color)) {
+			const fg = themeForeground(color);
+			root.style.setProperty('--primary', color);
+			root.style.setProperty('--primary-foreground', fg);
+			root.style.setProperty('--ring', color);
+			root.style.setProperty('--sidebar-primary', color);
+			root.style.setProperty('--sidebar-primary-foreground', fg);
+			root.style.setProperty('--sidebar-ring', color);
+		} else {
+			for (const name of THEME_VARS) root.style.removeProperty(name);
+		}
+	});
+
 	onMount(() => {
 		websocketController.connect();
 		startVipUserPolling();

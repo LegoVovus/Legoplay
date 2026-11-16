@@ -114,6 +114,7 @@ export const user = pgTable(
 		gems: integer('gems').notNull().default(0),
 		nameColor: text('name_color'),
 		profileBackground: text('profile_background'),
+	themeColor: text('theme_color'),
 		timezone: integer('timezone').default(0),
 		halloweenBadge2026: boolean('halloween_badge_2026').notNull().default(false),
 		signupIp: text('signup_ip'),

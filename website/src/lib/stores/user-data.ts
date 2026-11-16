@@ -20,6 +20,7 @@ export type User = {
 
 	nameColor: string | null;
 	profileBackground: string | null;
+	themeColor: string | null;
 	prestigeLevel: number;
 	hideAds: boolean;
 } | null;

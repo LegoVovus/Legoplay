@@ -87,6 +87,7 @@ export async function POST({ request }) {
 	const avatarFile = formData.get('avatar') as File | null;
 	const timezone = (formData.get('timezone') as string)?.trim();
 	const profileBackground = (formData.get('profileBackground') as string)?.trim();
+	const themeColor = (formData.get('themeColor') as string)?.trim();
 	name = name?.trim().replace(/\s+/g, ' ');
 
 	await validateInputs(name, bio, username, avatarFile, timezone);
@@ -94,6 +95,10 @@ export async function POST({ request }) {
 	// Only plain #RRGGBB values are allowed (rendered as CSS later).
 	if (profileBackground && !/^#[0-9a-fA-F]{6}$/.test(profileBackground)) {
 		throw error(400, 'Invalid profile background color');
+	}
+
+	if (themeColor && !/^#[0-9a-fA-F]{6}$/.test(themeColor)) {
+		throw error(400, 'Invalid theme color');
 	}
 
 	const updates: Record<string, any> = {
@@ -107,6 +112,10 @@ export async function POST({ request }) {
 	// other settings forms cannot wipe an existing choice.
 	if (formData.has('profileBackground')) {
 		updates.profileBackground = profileBackground ? profileBackground.toLowerCase() : null;
+	}
+
+	if (formData.has('themeColor')) {
+		updates.themeColor = themeColor ? themeColor.toLowerCase() : null;
 	}
 
 	if (timezone) {
@@ -146,6 +155,7 @@ export async function POST({ request }) {
 		name: name ?? null,
 		bio: bio ?? null,
 		username: username ?? null,
-		profileBackground: updates.profileBackground ?? null
+		profileBackground: updates.profileBackground ?? null,
+		themeColor: updates.themeColor ?? null
 	});
 }
