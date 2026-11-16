@@ -86,9 +86,15 @@ export async function POST({ request }) {
 	const username = (formData.get('username') as string)?.toLowerCase().trim();
 	const avatarFile = formData.get('avatar') as File | null;
 	const timezone = (formData.get('timezone') as string)?.trim();
+	const profileBackground = (formData.get('profileBackground') as string)?.trim();
 	name = name?.trim().replace(/\s+/g, ' ');
 
 	await validateInputs(name, bio, username, avatarFile, timezone);
+
+	// Only plain #RRGGBB values are allowed (rendered as CSS later).
+	if (profileBackground && !/^#[0-9a-fA-F]{6}$/.test(profileBackground)) {
+		throw error(400, 'Invalid profile background color');
+	}
 
 	const updates: Record<string, any> = {
 		name,
@@ -96,6 +102,12 @@ export async function POST({ request }) {
 		username,
 		updatedAt: new Date()
 	};
+
+	// Only touch the colour when the client actually sent the field, so
+	// other settings forms cannot wipe an existing choice.
+	if (formData.has('profileBackground')) {
+		updates.profileBackground = profileBackground ? profileBackground.toLowerCase() : null;
+	}
 
 	if (timezone) {
 		updates.timezone = +timezone;
@@ -133,6 +145,7 @@ export async function POST({ request }) {
 		ts: Date.now(),
 		name: name ?? null,
 		bio: bio ?? null,
-		username: username ?? null
+		username: username ?? null,
+		profileBackground: updates.profileBackground ?? null
 	});
 }

@@ -619,7 +619,14 @@
 			</div>
 		</div>
 	{:else}
-		<Card.Root class="mb-6 py-0">
+		<Card.Root class="mb-6 overflow-hidden py-0">
+			{#if profileData.profile.profileBackground}
+				<div
+					class="h-20 w-full sm:h-24"
+					style={`background: linear-gradient(120deg, ${profileData.profile
+						.profileBackground}, transparent 85%)`}
+				></div>
+			{/if}
 			<Card.Content class="p-6">
 				<div class="flex flex-col gap-4 sm:flex-row sm:items-start">
 					<div class="flex-shrink-0">

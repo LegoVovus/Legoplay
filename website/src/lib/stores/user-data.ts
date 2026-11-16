@@ -19,6 +19,7 @@ export type User = {
 	volumeMuted: boolean;
 
 	nameColor: string | null;
+	profileBackground: string | null;
 	prestigeLevel: number;
 	hideAds: boolean;
 } | null;

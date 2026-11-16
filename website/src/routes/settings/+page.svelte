@@ -42,6 +42,13 @@
 	let bio = $state($USER_DATA?.bio ?? '');
 	let username = $state($USER_DATA?.username || '');
 	let timezone = $state($USER_DATA?.timezone == null ? '' : $USER_DATA.timezone.toString());
+	let profileBackground = $state($USER_DATA?.profileBackground ?? '');
+
+	const PROFILE_BACKGROUNDS = [
+		'#ef4444','#f97316','#f59e0b','#eab308','#84cc16','#22c55e',
+		'#10b981','#14b8a6','#06b6d4','#0ea5e9','#3b82f6','#6366f1',
+		'#8b5cf6','#a855f7','#d946ef','#ec4899','#f43f5e','#64748b'
+	];
 	console.log($USER_DATA);
 	const initialUsername = $USER_DATA?.username || '';
 	let avatarFile: FileList | undefined = $state(undefined);
@@ -56,6 +63,7 @@
 			bio !== ($USER_DATA?.bio ?? '') ||
 			username !== ($USER_DATA?.username || '') ||
 			avatarFile !== undefined ||
+			profileBackground !== ($USER_DATA?.profileBackground ?? '') ||
 			+timezone !== (($USER_DATA?.timezone == null ? '' : $USER_DATA.timezone.toString()))
 	);
 
@@ -209,6 +217,7 @@
 			fd.append('bio', bio);
 			fd.append('username', username);
 			fd.append('timezone', timezone);
+			fd.append('profileBackground', profileBackground);
 			if (avatarFile?.[0]) fd.append('avatar', avatarFile[0]);
 
 			const res = await fetch('/api/settings', { method: 'POST', body: fd });
@@ -225,7 +234,8 @@
 									avatarUrl: result.imageKey ?? u.avatarUrl,
 									name: result.name ?? u.name,
 									bio: result.bio ?? u.bio,
-									username: result.username ?? u.username
+									username: result.username ?? u.username,
+									profileBackground: result.profileBackground ?? null
 								}
 							: u
 					);
@@ -768,6 +778,55 @@
 									</Select.Group>
 								</Select.Content>
 							</Select.Root>
+						</div>
+
+						<div class="space-y-3">
+							<Label>Profile Background</Label>
+							<p class="text-muted-foreground text-xs">
+								Pick a color for the banner at the top of your profile.
+							</p>
+							<div class="flex flex-wrap items-center gap-2">
+								<button
+									type="button"
+									onclick={() => (profileBackground = '')}
+									class="border-border text-muted-foreground hover:text-foreground h-8 rounded-full border px-3 text-xs transition-colors {profileBackground === ''
+										? 'ring-foreground bg-muted ring-2'
+										: ''}"
+								>
+									Default
+								</button>
+								{#each PROFILE_BACKGROUNDS as color}
+									<button
+										type="button"
+										aria-label={`Background ${color}`}
+										aria-pressed={profileBackground.toLowerCase() === color}
+										onclick={() => (profileBackground = color)}
+										class="ring-offset-background hover:scale-110 h-8 w-8 rounded-full transition-transform {profileBackground.toLowerCase() ===
+										color
+											? 'ring-foreground ring-2 ring-offset-2'
+											: 'ring-1 ring-border'}"
+										style={`background:${color}`}
+									></button>
+								{/each}
+								<label
+									class="border-border hover:border-foreground flex h-8 cursor-pointer items-center gap-1 rounded-full border px-2 text-xs transition-colors"
+									title="Custom color"
+								>
+									<input
+										type="color"
+										bind:value={profileBackground}
+										aria-label="Custom background color"
+										class="h-6 w-6 cursor-pointer rounded-full border-0 bg-transparent p-0"
+									/>
+									Custom
+								</label>
+							</div>
+							{#if profileBackground}
+								<div
+									class="border-border h-16 w-full rounded-md border"
+									style={`background: linear-gradient(120deg, ${profileBackground}, transparent 85%)`}
+								></div>
+							{/if}
 						</div>
 
 						<Button type="submit" disabled={loading || !isDirty || !!nameError}>

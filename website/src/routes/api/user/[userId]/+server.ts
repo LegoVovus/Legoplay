@@ -31,6 +31,7 @@ export async function GET({ params, request }) {
 				arcadeWins: true,
 				arcadeLosses: true,
 				nameColor: true,
+				profileBackground: true,
 				timezone: true,
 				flags: true,
 				halloweenBadge2026: true
