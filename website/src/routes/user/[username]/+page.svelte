@@ -40,6 +40,16 @@
 	let username = $derived(data.username);
 
 	let profileData = $state(data.profileData);
+
+	// Page canvas: the picked colour, mixed down towards near-black so that
+	// every card stays readable on top of it.
+	function profilePageColor(hex: string, weight = 0.38): string {
+		const n = parseInt(hex.replace('#', ''), 16);
+		const target = [10, 10, 12];
+		const own = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+		const mixed = own.map((c, i) => Math.round(c * weight + target[i] * (1 - weight)));
+		return `rgb(${mixed[0]} ${mixed[1]} ${mixed[2]})`;
+	}
 	let recentTransactions = $state(data.recentTransactions);
 	let loading = $state(false);
 	let usersTimezone = getTimezoneDate(profileData?.profile?.timezone);
@@ -608,15 +618,14 @@
 	twitterCard="summary"
 />
 
-<div class="relative">
-	{#if profileData?.profile?.profileBackground}
-		<div
-			aria-hidden="true"
-			class="pointer-events-none absolute inset-0"
-			style={`background: linear-gradient(180deg, ${profileData.profile
-				.profileBackground}59 0%, ${profileData.profile.profileBackground}1f 25%, transparent 65%)`}
-		></div>
-	{/if}
+<div
+	class={profileData?.profile?.profileBackground
+		? 'profile-page text-white relative -mx-4 lg:-mx-6'
+		: 'relative'}
+	style={profileData?.profile?.profileBackground
+		? `background:${profilePageColor(profileData.profile.profileBackground)}`
+		: ''}
+>
 	<div class="container relative mx-auto max-w-6xl p-6">
 	{#if loading}
 		<ProfileSkeleton />
@@ -1170,3 +1179,16 @@
 		</div>
 	</Dialog.Content>
 </Dialog.Root>
+
+<style>
+	.profile-page :global([data-slot='card']) {
+		background-image: linear-gradient(180deg, rgb(0 0 0 / 0.02) 0%, rgb(0 0 0 / 0.32) 100%);
+		box-shadow: 0 22px 45px -28px rgb(0 0 0 / 0.55);
+		border-color: rgb(255 255 255 / 0.14);
+	}
+
+	:global(.dark) .profile-page :global([data-slot='card']) {
+		background-image: linear-gradient(180deg, rgb(255 255 255 / 0.07) 0%, rgb(0 0 0 / 0.55) 100%);
+		box-shadow: 0 22px 45px -28px rgb(0 0 0 / 0.9);
+	}
+</style>

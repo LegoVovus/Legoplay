@@ -44,6 +44,14 @@
 	let timezone = $state($USER_DATA?.timezone == null ? '' : $USER_DATA.timezone.toString());
 	let profileBackground = $state($USER_DATA?.profileBackground ?? '');
 
+	function profilePreviewColor(hex: string, weight = 0.38): string {
+		const n = parseInt(hex.replace('#', ''), 16);
+		const target = [10, 10, 12];
+		const own = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+		const mixed = own.map((c, i) => Math.round(c * weight + target[i] * (1 - weight)));
+		return `rgb(${mixed[0]} ${mixed[1]} ${mixed[2]})`;
+	}
+
 	const PROFILE_BACKGROUNDS = [
 		'#ef4444','#f97316','#f59e0b','#eab308','#84cc16','#22c55e',
 		'#10b981','#14b8a6','#06b6d4','#0ea5e9','#3b82f6','#6366f1',
@@ -823,9 +831,14 @@
 							</div>
 							{#if profileBackground}
 								<div
-									class="border-border h-24 w-full rounded-md border"
-									style={`background: linear-gradient(180deg, ${profileBackground}, transparent 85%)`}
-								></div>
+									class="border-border relative h-32 w-full overflow-hidden rounded-md border p-3"
+									style={`background:${profilePreviewColor(profileBackground)}`}
+								>
+									<div
+										class="h-full w-full rounded-md border border-white/15"
+										style="background: linear-gradient(180deg, rgb(0 0 0 / 0.02) 0%, rgb(0 0 0 / 0.55) 100%)"
+									></div>
+								</div>
 							{/if}
 						</div>
 
