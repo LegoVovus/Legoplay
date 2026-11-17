@@ -354,7 +354,7 @@
 
 						<div class="flex flex-wrap gap-2 pt-2">
 							<Button type="button" variant="outline" onclick={preview}>
-								<HugeiconsIcon icon={Sparkles01Icon} class="mr-1 h-4 w-4" />
+								<HugeiconsIcon icon={SparklesIcon} class="mr-1 h-4 w-4" />
 								Preview locally
 							</Button>
 							<Button
