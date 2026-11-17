@@ -29,7 +29,7 @@ const pingIntervals = new WeakMap<ServerWebSocket<WebSocketData>, NodeJS.Timeout
 redis.on('error', (err) => console.error('Redis Client Error', err));
 
 redis.on('connect', () => {
-	redis.psubscribe('comments:*', 'prices:*', 'notifications:*', 'chat:*', (err, count) => {
+	redis.psubscribe('comments:*', 'prices:*', 'notifications:*', 'chat:*', 'admin:abuse', (err, count) => {
 		if (err) console.error('Failed to psubscribe to patterns', err);
 		else console.log(`Successfully psubscribed to patterns. Active psubscriptions: ${count}`);
 	});
@@ -45,7 +45,21 @@ redis.on('pmessage', (pattern, channel, msg) => {
 		`[Redis pmessage RECEIVED] Pattern: "${pattern}", Channel: "${channel}", Message: "${msg}"`
 	);
 	try {
-		if (channel.startsWith('comments:')) {
+		if (channel === 'admin:abuse') {
+			// Admin Abuse overlays go to every connected socket.
+			const allSockets = new Set<ServerWebSocket<WebSocketData>>();
+			for (const [, sockets] of coinSockets.entries()) {
+				for (const ws of sockets) allSockets.add(ws);
+			}
+			for (const [, sockets] of userSockets.entries()) {
+				for (const ws of sockets) allSockets.add(ws);
+			}
+			for (const ws of allSockets) {
+				if (ws.readyState === WebSocket.OPEN) {
+					ws.send(msg);
+				}
+			}
+		} else if (channel.startsWith('comments:')) {
 			const coinSymbol = channel.substring('comments:'.length);
 			const sockets = coinSockets.get(coinSymbol);
 			if (sockets) {

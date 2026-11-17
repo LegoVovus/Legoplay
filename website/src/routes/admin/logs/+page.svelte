@@ -11,7 +11,9 @@
 		LegalHammerIcon,
 		UserCheck01Icon,
 		Ticket01Icon,
-		Cancel01Icon
+		Cancel01Icon,
+		Megaphone01Icon,
+		GiftIcon
 	} from '@hugeicons/core-free-icons';
 	import { hasFlag, UserFlags } from '$lib/data/flags';
 
@@ -63,6 +65,18 @@
 				return 'Promo Created';
 			case 'PROMO_DELETE':
 				return 'Promo Deleted';
+			case 'TOGGLE_ADMIN':
+				return 'Admin Toggle';
+			case 'TOGGLE_DEVELOPER':
+				return 'Developer Toggle';
+			case 'TOGGLE_BADGE':
+				return 'Badge Toggle';
+			case 'ABUSE_BROADCAST':
+				return 'Abuse Broadcast';
+			case 'ABUSE_GRANT':
+				return 'Abuse Grant';
+			default:
+				return action;
 		}
 	}
 
@@ -76,6 +90,16 @@
 				return Ticket01Icon;
 			case 'PROMO_DELETE':
 				return Cancel01Icon;
+			case 'TOGGLE_ADMIN':
+			case 'TOGGLE_DEVELOPER':
+			case 'TOGGLE_BADGE':
+				return Shield01Icon;
+			case 'ABUSE_BROADCAST':
+				return Megaphone01Icon;
+			case 'ABUSE_GRANT':
+				return GiftIcon;
+			default:
+				return Shield01Icon;
 		}
 	}
 
@@ -91,6 +115,15 @@
 				return 'secondary';
 			case 'PROMO_DELETE':
 				return 'outline';
+			case 'TOGGLE_ADMIN':
+			case 'TOGGLE_DEVELOPER':
+			case 'TOGGLE_BADGE':
+				return 'secondary';
+			case 'ABUSE_BROADCAST':
+			case 'ABUSE_GRANT':
+				return 'destructive';
+			default:
+				return 'secondary';
 		}
 	}
 

@@ -11,14 +11,18 @@ export type AdminAction =
 	| 'PROMO_DELETE'
 	| 'TOGGLE_ADMIN'
 	| 'TOGGLE_DEVELOPER'
-	| 'TOGGLE_BADGE';
+	| 'TOGGLE_BADGE'
+	| 'ABUSE_BROADCAST'
+	| 'ABUSE_GRANT';
+
+export type AdminLogRow = typeof adminLog.$inferSelect;
 
 export async function writeAdminLog(
 	adminId: number,
 	action: AdminAction,
 	targetUserId: number | null,
 	details: string | null
-) {
+): Promise<AdminLogRow | null> {
 	try {
 		const [entry] = await db
 			.insert(adminLog)
@@ -62,8 +66,11 @@ export async function writeAdminLog(
 		};
 
 		await redis.publish('admin:logs', JSON.stringify(payload));
+
+		return entry;
 	} catch (e) {
 		// Non-fatal — don't let logging failures break the actual action
 		console.error('Failed to write admin log:', e);
+		return null;
 	}
 }

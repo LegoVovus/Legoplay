@@ -10,7 +10,8 @@
 		ArrowRight01Icon,
 		UserGroupIcon,
 		Analytics01Icon,
-		PodiumIcon
+		PodiumIcon,
+		Megaphone01Icon
 	} from '@hugeicons/core-free-icons';
 	import { goto } from '$app/navigation';
 	import { hasFlag } from '$lib/data/flags';
@@ -62,7 +63,7 @@
 		];
 	}
 
-	const adminSections = [
+	const baseAdminSections = [
 		{
 			title: 'User Management',
 			description: 'Manage Users.',
@@ -99,6 +100,22 @@
 			color: 'text-red-500'
 		}
 	];
+
+	const abuseSection = {
+		title: 'Admin Abuse',
+		description: 'Full-screen announcements, money and gem drops for head admins.',
+		icon: Megaphone01Icon,
+		url: '/admin/abuse',
+		color: 'text-destructive'
+	};
+
+	function adminSections() {
+		const sections = [...baseAdminSections];
+		if (hasFlag($USER_DATA?.flags, 'IS_HEAD_ADMIN')) {
+			sections.push(abuseSection);
+		}
+		return sections;
+	}
 </script>
 
 <svelte:head>
@@ -131,7 +148,7 @@
 		</div>
 
 		<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-			{#each adminSections as section}
+			{#each adminSections() as section}
 				<Card.Root class="hover:border-primary/50 transition-colors">
 					<Card.Header>
 						<div class="flex items-center justify-between">

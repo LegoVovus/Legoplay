@@ -609,7 +609,9 @@ export const adminActionEnum = pgEnum('admin_action', [
 	'PROMO_DELETE',
 	'TOGGLE_ADMIN',
 	'TOGGLE_DEVELOPER',
-	'TOGGLE_BADGE'
+	'TOGGLE_BADGE',
+	'ABUSE_BROADCAST',
+	'ABUSE_GRANT'
 ]);
 
 export const adminLog = pgTable(

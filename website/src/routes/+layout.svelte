@@ -6,6 +6,7 @@
 
 	import AppSidebar from '$lib/components/self/AppSidebar.svelte';
 	import PasswordSetupPrompt from '$lib/components/self/PasswordSetupPrompt.svelte';
+	import AdminAbuseOverlay from '$lib/components/self/AdminAbuseOverlay.svelte';
 
 	import { USER_DATA } from '$lib/stores/user-data';
 	import { onMount, untrack } from 'svelte';
@@ -141,6 +142,7 @@ import { startVipUserPolling } from '$lib/stores/vip-users';
 			'/settings': $_('page_names.settings'),
 			'/admin': $_('page_names.admin.main'),
 			'/admin/promo': $_('page_names.admin.promo'),
+			'/admin/abuse': 'Admin Abuse',
 			'/transactions': $_('page_names.transactions'),
 			'/groups': $_('page_names.groups'),
 			'/lottery': $_('page_names.lottery'),
@@ -172,6 +174,7 @@ import { startVipUserPolling } from '$lib/stores/vip-users';
 <!-- <RenderScan /> -->
 <ModeWatcher />
 <Toaster richColors={true} />
+<AdminAbuseOverlay />
 
 <Sidebar.Provider>
 	<AppSidebar />

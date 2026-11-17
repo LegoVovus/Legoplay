@@ -8,6 +8,7 @@ import { addChatMessage, incrementChatUnread, CHAT_UNREAD_COUNT, ACTIVE_CHANNEL_
 import { toast } from 'svelte-sonner';
 import { goto } from '$app/navigation';
 import { hasFlag, UserFlags } from '$lib/data/flags';
+import { pushAdminAbuseEvent, type AdminAbuseEvent } from './admin-abuse';
 
 export interface LiveTrade {
 	type: 'BUY' | 'SELL' | 'BURN' | 'TRANSFER_IN' | 'TRANSFER_OUT';
@@ -119,7 +120,16 @@ export const arcadeActivityStore = createArcadeActivityStore();
 
 export interface AdminLogEntry {
 	id: number;
-	action: 'BAN' | 'UNBAN' | 'PROMO_CREATE' | 'PROMO_DELETE';
+	action:
+		| 'BAN'
+		| 'UNBAN'
+		| 'PROMO_CREATE'
+		| 'PROMO_DELETE'
+		| 'TOGGLE_ADMIN'
+		| 'TOGGLE_DEVELOPER'
+		| 'TOGGLE_BADGE'
+		| 'ABUSE_BROADCAST'
+		| 'ABUSE_GRANT';
 	adminId: number;
 	adminUsername: string;
 	targetUserId: number | null;
@@ -286,6 +296,10 @@ function handleWebSocketMessage(event: MessageEvent): void {
 
 			case 'admin_log':
 				adminLogStore.update((logs) => [message.data, ...logs.slice(0, 199)]);
+				break;
+
+			case 'admin_abuse':
+				pushAdminAbuseEvent(message as AdminAbuseEvent);
 				break;
 
 			case 'ping':
