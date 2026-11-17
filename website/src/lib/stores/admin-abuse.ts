@@ -2,6 +2,7 @@ import { writable, get } from 'svelte/store';
 import { toast } from 'svelte-sonner';
 import { USER_DATA } from './user-data';
 import { fetchGemsBalance } from './gems';
+import { fetchPortfolioSummary } from './portfolio-data';
 
 export type AbuseEffect = 'none' | 'confetti' | 'rain' | 'shake';
 
@@ -93,6 +94,8 @@ export function pushAdminAbuseEvent(event: AdminAbuseEvent): void {
 						}
 					: user
 			);
+			// The sidebar wallet reads from the portfolio summary, so refresh it too.
+			fetchPortfolioSummary();
 		}
 		if (event.gems > 0) {
 			fetchGemsBalance();
