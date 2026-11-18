@@ -1,4 +1,4 @@
-<img style="width: 128px; height: 128px" src="website/static/legoplay.png" /><h1 style="font-size: 48px"><a href="https://legoplay.lordpipon.com">legoplay.lordpipon.com</a> - the fake crypto simulator.</h1>
+<img style="width: 128px; height: 128px" src="website/static/legoplay.png" /><h1 style="font-size: 48px"><a href="https://legoplay.lordpipon.com">Legoplay</a> - the fake crypto simulator.</h1>
 
 [Privacy Policy](https://legoplay.lordpipon.com/legal/privacy) | [Terms of Service](https://legoplay.lordpipon.com/legal/terms) | [License](LICENSE) | [YouTube video](https://www.youtube.com/watch?v=nRUkvPMphRc)
 
