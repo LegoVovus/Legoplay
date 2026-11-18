@@ -5,6 +5,14 @@ import { fetchGemsBalance } from './gems';
 import { fetchPortfolioSummary } from './portfolio-data';
 
 export type AbuseEffect = 'none' | 'confetti' | 'rain' | 'shake';
+export type AbuseReactionEmoji = '?' | '?' | '??';
+
+export const ABUSE_REACTION_EMOJIS: AbuseReactionEmoji[] = ['?', '?', '??'];
+
+export interface AbuseReactionState {
+	counts: Record<AbuseReactionEmoji, number>;
+	mine: AbuseReactionEmoji | null;
+}
 
 export interface AdminAbuseEvent {
 	id: number;
@@ -31,6 +39,68 @@ export interface AdminAbuseEvent {
  * time; the overlay dismisses it after its own duration and the next one shows up.
  */
 export const ADMIN_ABUSE_QUEUE = writable<AdminAbuseEvent[]>([]);
+export const ADMIN_ABUSE_REACTIONS = writable<Record<number, AbuseReactionState>>({});
+
+function emptyReactionState(): AbuseReactionState {
+	return { counts: { '?': 0, '?': 0, '??': 0 }, mine: null };
+}
+
+export function setAdminAbuseReactionCounts(
+	eventId: number,
+	counts: Partial<Record<AbuseReactionEmoji, number>>
+): void {
+	ADMIN_ABUSE_REACTIONS.update((map) => {
+		const prev = map[eventId] ?? emptyReactionState();
+		return {
+			...map,
+			[eventId]: {
+				...prev,
+				counts: {
+					'?': Number(counts['?'] ?? prev.counts['?'] ?? 0),
+					'?': Number(counts['?'] ?? prev.counts['?'] ?? 0),
+					'??': Number(counts['??'] ?? prev.counts['??'] ?? 0)
+				}
+			}
+		};
+	});
+}
+
+export function markMyAdminAbuseReaction(eventId: number, emoji: AbuseReactionEmoji): void {
+	ADMIN_ABUSE_REACTIONS.update((map) => {
+		const prev = map[eventId] ?? emptyReactionState();
+		return { ...map, [eventId]: { ...prev, mine: emoji } };
+	});
+}
+
+export async function reactToAdminAbuse(eventId: number, emoji: AbuseReactionEmoji): Promise<void> {
+	const current = get(ADMIN_ABUSE_REACTIONS)[eventId];
+	if (current?.mine) return;
+	markMyAdminAbuseReaction(eventId, emoji);
+	try {
+		const response = await fetch('/api/admin/abuse', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ kind: 'react', eventId, emoji })
+		});
+		if (!response.ok) {
+			ADMIN_ABUSE_REACTIONS.update((map) => {
+				const prev = map[eventId] ?? emptyReactionState();
+				return { ...map, [eventId]: { ...prev, mine: null } };
+			});
+			const data = await response.json().catch(() => ({}));
+			toast.error(data.error || 'Could not add reaction');
+			return;
+		}
+		const data = await response.json().catch(() => null);
+		if (data?.reactions) setAdminAbuseReactionCounts(eventId, data.reactions);
+	} catch {
+		ADMIN_ABUSE_REACTIONS.update((map) => {
+			const prev = map[eventId] ?? emptyReactionState();
+			return { ...map, [eventId]: { ...prev, mine: null } };
+		});
+		toast.error('Could not add reaction');
+	}
+}
 
 const SEEN_LIMIT = 400;
 const seen = new Set<string>();

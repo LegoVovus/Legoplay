@@ -8,7 +8,7 @@ import { addChatMessage, incrementChatUnread, CHAT_UNREAD_COUNT, ACTIVE_CHANNEL_
 import { toast } from 'svelte-sonner';
 import { goto } from '$app/navigation';
 import { hasFlag, UserFlags } from '$lib/data/flags';
-import { pushAdminAbuseEvent, type AdminAbuseEvent } from './admin-abuse';
+import { pushAdminAbuseEvent, setAdminAbuseReactionCounts, type AdminAbuseEvent } from './admin-abuse';
 
 export interface LiveTrade {
 	type: 'BUY' | 'SELL' | 'BURN' | 'TRANSFER_IN' | 'TRANSFER_OUT';
@@ -300,6 +300,12 @@ function handleWebSocketMessage(event: MessageEvent): void {
 
 			case 'admin_abuse':
 				pushAdminAbuseEvent(message as AdminAbuseEvent);
+				break;
+
+			case 'admin_abuse_reaction':
+				if (message.eventId && message.reactions) {
+					setAdminAbuseReactionCounts(Number(message.eventId), message.reactions);
+				}
 				break;
 
 			case 'ping':

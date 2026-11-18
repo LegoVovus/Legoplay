@@ -1,9 +1,13 @@
 <script lang="ts">
 	import {
 		ADMIN_ABUSE_QUEUE,
+		ADMIN_ABUSE_REACTIONS,
+		ABUSE_REACTION_EMOJIS,
 		dismissAdminAbuse,
 		formatAbuseMoney,
+		reactToAdminAbuse,
 		type AbuseEffect,
+		type AbuseReactionEmoji,
 		type AdminAbuseEvent
 	} from '$lib/stores/admin-abuse';
 	import { HugeiconsIcon } from '@hugeicons/svelte';
@@ -43,6 +47,14 @@
 	let current: AdminAbuseEvent | null = $derived($ADMIN_ABUSE_QUEUE[0] ?? null);
 	let particles = $state<Particle[]>([]);
 	let progress = $state(1);
+	let currentReactions = $derived(
+		current ? $ADMIN_ABUSE_REACTIONS[current.id] ?? { counts: { '?': 0, '?': 0, '??': 0 }, mine: null } : null
+	);
+
+	async function react(emoji: AbuseReactionEmoji) {
+		if (!current || current.preview) return;
+		await reactToAdminAbuse(current.id, emoji);
+	}
 
 	function makeParticles(effect: AbuseEffect): Particle[] {
 		if (effect !== 'confetti' && effect !== 'rain') return [];
@@ -226,6 +238,25 @@
 								{current.recipients.toLocaleString('en-US')} players
 							</div>
 						{/if}
+					</div>
+				{/if}
+
+				{#if !current.preview}
+					<div class="mt-5 flex flex-wrap gap-2">
+						{#each ABUSE_REACTION_EMOJIS as emoji}
+							<button
+								type="button"
+								class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-semibold transition {currentReactions?.mine === emoji
+									? 'border-primary bg-primary/15 text-primary'
+									: 'border-border bg-muted/60 text-foreground hover:border-primary/40 hover:bg-muted'} disabled:cursor-not-allowed disabled:opacity-60"
+								onclick={() => react(emoji)}
+								disabled={!!currentReactions?.mine}
+								aria-label={`React with ${emoji}`}
+							>
+								<span class="leading-none">{emoji}</span>
+								<span class="tabular-nums text-muted-foreground">{currentReactions?.counts[emoji] ?? 0}</span>
+							</button>
+						{/each}
 					</div>
 				{/if}
 

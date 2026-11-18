@@ -161,14 +161,18 @@ export const GET: RequestHandler = async ({ request }) => {
 };
 
 export const POST: RequestHandler = async ({ request }) => {
-	const admin = await requireHeadAdmin(request);
-
 	let body: Record<string, unknown>;
 	try {
 		body = (await request.json()) as Record<string, unknown>;
 	} catch {
 		return json({ error: 'Invalid request body' }, { status: 400 });
 	}
+
+	if (body.kind === 'react') {
+		return react(request, body);
+	}
+
+	const admin = await requireHeadAdmin(request);
 
 	if (body.kind === 'broadcast') {
 		return broadcast(admin, body);
@@ -177,8 +181,68 @@ export const POST: RequestHandler = async ({ request }) => {
 		return grant(admin, body);
 	}
 
-	return json({ error: "Unknown action. Use 'broadcast' or 'grant'." }, { status: 400 });
+	return json({ error: "Unknown action. Use 'broadcast', 'grant', or 'react'." }, { status: 400 });
 };
+
+
+const REACTION_EMOJIS = ['?', '?', '??'] as const;
+type ReactionEmoji = (typeof REACTION_EMOJIS)[number];
+
+async function react(request: Request, body: Record<string, unknown>) {
+	const session = await auth.api.getSession({ headers: request.headers });
+	if (!session?.user) return json({ error: 'Not authenticated' }, { status: 401 });
+
+	const userId = Number(session.user.id);
+	const eventId = cleanNumber(body.eventId);
+	const emoji = String(body.emoji ?? '');
+
+	if (!Number.isFinite(eventId) || eventId <= 0) {
+		return json({ error: 'Invalid event.' }, { status: 400 });
+	}
+	if (!REACTION_EMOJIS.includes(emoji as ReactionEmoji)) {
+		return json({ error: 'Invalid reaction.' }, { status: 400 });
+	}
+
+	if (await rateLimited(`react:fast:${userId}`, 10, 30)) {
+		return json({ error: 'Too many reactions, slow down.' }, { status: 429 });
+	}
+
+	const reactedKey = `admin:abuse:reacted:${eventId}:${userId}`;
+	const countsKey = `admin:abuse:reactions:${eventId}`;
+
+	const first = await redis.set(reactedKey, emoji, 'EX', 3600, 'NX');
+	if (first !== 'OK') {
+		const existing = await redis.hgetall(countsKey);
+		return json({
+			success: true,
+			already: true,
+			reactions: {
+				'?': Number(existing['?'] || 0),
+				'?': Number(existing['?'] || 0),
+				'??': Number(existing['??'] || 0)
+			}
+		});
+	}
+
+	await redis.hincrby(countsKey, emoji, 1);
+	await redis.expire(countsKey, 3600);
+	const counts = await redis.hgetall(countsKey);
+	const reactions = {
+		'?': Number(counts['?'] || 0),
+		'?': Number(counts['?'] || 0),
+		'??': Number(counts['??'] || 0)
+	};
+
+	const event = {
+		type: 'admin_abuse_reaction',
+		eventId,
+		reactions,
+		sentAt: Date.now()
+	};
+	await redis.publish('admin:abuse', JSON.stringify(event));
+
+	return json({ success: true, reactions });
+}
 
 async function broadcast(admin: HeadAdmin, body: Record<string, unknown>) {
 	if (await rateLimited(`broadcast:fast:${admin.id}`, 1, 4)) {
