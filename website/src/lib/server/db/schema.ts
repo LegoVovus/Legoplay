@@ -1134,3 +1134,34 @@ export const seasonTrophy = pgTable(
 		seasonIdIdx: index('season_trophy_season_id_idx').on(table.seasonId)
 	})
 );
+
+// ---- Daily Quests ----
+
+export const dailyQuestProgress = pgTable(
+	'daily_quest_progress',
+	{
+		id: serial('id').primaryKey(),
+		userId: integer('user_id')
+			.notNull()
+			.references(() => user.id, { onDelete: 'cascade' }),
+		day: varchar('day', { length: 10 }).notNull(),
+		slot: integer('slot').notNull(),
+		questType: varchar('quest_type', { length: 50 }).notNull(),
+		target: integer('target').notNull(),
+		rewardCash: decimal('reward_cash', { precision: 30, scale: 8 }).notNull().default('0'),
+		rewardGems: integer('reward_gems').notNull().default(0),
+		baseline: integer('baseline').notNull().default(0),
+		claimed: boolean('claimed').notNull().default(false),
+		claimedAt: timestamp('claimed_at', { withTimezone: true }),
+		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+		updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+	},
+	(table) => ({
+		userDaySlotUnique: unique('daily_quest_progress_user_day_slot_unique').on(
+			table.userId,
+			table.day,
+			table.slot
+		),
+		userDayIdx: index('daily_quest_progress_user_day_idx').on(table.userId, table.day)
+	})
+);

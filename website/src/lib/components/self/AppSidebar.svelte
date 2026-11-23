@@ -90,6 +90,7 @@
 			{ title: 'Messages', url: '/chat', icon: Message01Icon },
 			{ title: 'VIP', url: '/vip', icon: CrownIcon },
 			{ title: 'Battlepass', url: '/battlepass', icon: Award05Icon },
+			{ title: 'Daily Quests', url: '/quests', icon: GiftIcon },
 			{ title: 'Updates', url: '/updates', icon: News01Icon },
 			{ title: $_('page_names.about'), url: '/about', icon: InformationCircleIcon },
 		]
