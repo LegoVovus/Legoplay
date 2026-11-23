@@ -49,7 +49,7 @@ const SLOTS: SlotDef[] = [
 	{
 		slot: 3,
 		difficulty: 'hard',
-		rewardCash: 80000,
+		rewardCash: 50000,
 		rewardGems: 75,
 		pool: [
 			{ type: 'trades', label: 'Market Maker', description: 'Complete {target} trades', target: 40 },
