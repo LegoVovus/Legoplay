@@ -38,7 +38,7 @@ const SLOTS: SlotDef[] = [
 		slot: 2,
 		difficulty: 'medium',
 		rewardCash: 40000,
-		rewardGems: 100,
+		rewardGems: 25,
 		pool: [
 			{ type: 'trades', label: 'Active Trader', description: 'Complete {target} trades', target: 15 },
 			{ type: 'arcade_games', label: 'Arcade Grinder', description: 'Play {target} arcade games', target: 25 },
@@ -50,7 +50,7 @@ const SLOTS: SlotDef[] = [
 		slot: 3,
 		difficulty: 'hard',
 		rewardCash: 80000,
-		rewardGems: 150,
+		rewardGems: 75,
 		pool: [
 			{ type: 'trades', label: 'Market Maker', description: 'Complete {target} trades', target: 40 },
 			{ type: 'arcade_games', label: 'Arcade Marathon', description: 'Play {target} arcade games', target: 50 },
