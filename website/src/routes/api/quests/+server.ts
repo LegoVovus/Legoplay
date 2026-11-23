@@ -79,7 +79,7 @@ function hashString(input: string): number {
 }
 
 function pickQuest(slotDef: SlotDef, day: string): QuestDef {
-	const idx = hashString(${day}:) % slotDef.pool.length;
+	const idx = hashString(`${day}:${slotDef.slot}`) % slotDef.pool.length;
 	return slotDef.pool[idx];
 }
 
@@ -303,8 +303,8 @@ export const POST: RequestHandler = async ({ request }) => {
 		await tx
 			.update(user)
 			.set({
-				baseCurrencyBalance: sqlCAST( AS NUMERIC) + ,
-				gems: sql${user.gems} + ,
+				baseCurrencyBalance: sql`CAST(${user.baseCurrencyBalance} AS NUMERIC) + ${cash}`,
+				gems: sql`${user.gems} + ${gems}`,
 				updatedAt: new Date()
 			})
 			.where(eq(user.id, userId));
@@ -314,13 +314,13 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	const slotDef = SLOTS.find((s) => s.slot === slot)!;
 	const quest = slotDef.pool.find((q) => q.type === row.questType) ?? pickQuest(slotDef, day);
-	const rewardLabel = gems > 0 ? $ +  gems : $;
+	const rewardLabel = gems > 0 ? `${cash.toLocaleString('en-US')} + ${gems} gems` : `${cash.toLocaleString('en-US')}`;
 
 	await createNotification(
 		String(userId),
 		'SYSTEM',
 		'Daily Quest Completed!',
-		${quest.label}: ,
+		`${quest.label}: ${rewardLabel}`,
 		'/quests'
 	).catch(() => {});
 
