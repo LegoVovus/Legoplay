@@ -111,6 +111,19 @@ Resolution result: {
 				}
 			}
 
+				const infraFailure =
+					resolution.confidence < 50 &&
+					/AI service is not configured|Failed to resolve question due to AI service error|rate limit|AI timed out/i.test(
+						resolution.reasoning || ''
+					);
+
+				if (infraFailure) {
+					console.log(
+						`Skipping question ${question.id} due to AI infra failure (confidence ${resolution.confidence}): ${resolution.reasoning}`
+					);
+					continue;
+				}
+
 				if (resolution.confidence < 50) {
 					console.log(
 						`Cancelling question ${question.id} due to low confidence: ${resolution.confidence}`
