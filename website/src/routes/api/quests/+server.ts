@@ -40,10 +40,10 @@ const SLOTS: SlotDef[] = [
 		rewardCash: 40000,
 		rewardGems: 100,
 		pool: [
-			{ type: 'trades', label: 'Active Trader', description: 'Complete {target} trades', target: 10 },
-			{ type: 'arcade_games', label: 'Arcade Grinder', description: 'Play {target} arcade games', target: 15 },
-			{ type: 'volume_traded', label: 'Volume Pusher', description: 'Trade  in total volume', target: 25000 },
-			{ type: 'predictions', label: 'Oracle', description: 'Place {target} prediction bets', target: 3 }
+			{ type: 'trades', label: 'Active Trader', description: 'Complete {target} trades', target: 15 },
+			{ type: 'arcade_games', label: 'Arcade Grinder', description: 'Play {target} arcade games', target: 25 },
+			{ type: 'volume_traded', label: 'Volume Pusher', description: 'Trade ${target} in total volume', target: 50000 },
+			{ type: 'predictions', label: 'Oracle', description: 'Place {target} prediction bets', target: 5 }
 		]
 	},
 	{
@@ -52,10 +52,10 @@ const SLOTS: SlotDef[] = [
 		rewardCash: 80000,
 		rewardGems: 150,
 		pool: [
-			{ type: 'trades', label: 'Market Maker', description: 'Complete {target} trades', target: 25 },
-			{ type: 'arcade_games', label: 'Arcade Marathon', description: 'Play {target} arcade games', target: 30 },
-			{ type: 'volume_traded', label: 'Whale Moves', description: 'Trade  in total volume', target: 75000 },
-			{ type: 'predictions', label: 'Prophet', description: 'Place {target} prediction bets', target: 8 }
+			{ type: 'trades', label: 'Market Maker', description: 'Complete {target} trades', target: 40 },
+			{ type: 'arcade_games', label: 'Arcade Marathon', description: 'Play {target} arcade games', target: 50 },
+			{ type: 'volume_traded', label: 'Whale Moves', description: 'Trade ${target} in total volume', target: 150000 },
+			{ type: 'predictions', label: 'Prophet', description: 'Place {target} prediction bets', target: 12 }
 		]
 	}
 ];
