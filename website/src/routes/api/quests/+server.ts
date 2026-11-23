@@ -92,13 +92,13 @@ async function getRawCounts(userId: number, userData: any) {
 	const [tradeRes] = await db
 		.select({
 			trades: count(),
-			volume: sql<string>COALESCE(SUM(CASE WHEN  IN ('BUY','SELL') THEN CAST( AS NUMERIC) ELSE 0 END), 0)
+			volume: sql<string>`COALESCE(SUM(CASE WHEN ${transaction.type} IN ('BUY','SELL') THEN CAST(${transaction.totalBaseCurrencyAmount} AS NUMERIC) ELSE 0 END), 0)`
 		})
 		.from(transaction)
 		.where(eq(transaction.userId, userId));
 
 	const [lotteryRes] = await db
-		.select({ tickets: sql<string>COALESCE(SUM(), 0) })
+		.select({ tickets: sql<string>`COALESCE(SUM(${lotteryTicket.quantity}), 0)` })
 		.from(lotteryTicket)
 		.where(eq(lotteryTicket.userId, userId));
 
