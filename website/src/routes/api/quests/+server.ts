@@ -1,10 +1,10 @@
-import { auth } from '/auth';
+import { auth } from '$lib/auth';
 import { error, json } from '@sveltejs/kit';
-import { db } from '/server/db';
-import { dailyQuestProgress, lotteryTicket, predictionBet, transaction, user } from '/server/db/schema';
+import { db } from '$lib/server/db';
+import { dailyQuestProgress, lotteryTicket, predictionBet, transaction, user } from '$lib/server/db/schema';
 import { and, count, eq, sql } from 'drizzle-orm';
-import type { RequestHandler } from './';
-import { createNotification } from '/server/notification';
+import type { RequestHandler } from './$types';
+import { createNotification } from '$lib/server/notification';
 
 type QuestDef = {
 	type: string;
